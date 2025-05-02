@@ -51,21 +51,18 @@ player_img = load_asset('img', 'NavaCombate1.png', size=PLAYER_SIZE, rotate=-45)
 missile_img = load_asset('img', 'Missil1.png', size=MISSILE_SIZE, rotate=-90)
 explosion_img = load_asset('img', 'explosao1.png', size=EXPLOSION_SIZE)
 
-# Carregar sons (se o mixer estiver ativo)
 shoot_sound = load_asset('sound', 'laser_shoot.mp3')
 explosion_sound = load_asset('sound', 'explosion.mp3')
 game_over_sound = load_asset('sound', 'game_over.mp3')
-music_loaded = load_asset('music', 'background_music.mp3') # Carrega música de fundo
+music_loaded = load_asset('music', 'background_music.mp3') 
 
-if music_loaded and pygame.mixer: pygame.mixer.music.set_volume(0.4) # Ajusta volume da música
+if music_loaded and pygame.mixer: pygame.mixer.music.set_volume(0.4) 
 
-# --- Estado Global (Aprox. 5 linhas) ---
-game_state = 'MENU' # 'MENU', 'PLAYING', 'GAME_OVER'
+game_state = 'MENU' 
 running = True
 game_over_start_time = 0
 score = 0
 
-# --- Variáveis de Jogo (Aprox. 10 linhas) ---
 player_rect = player_img.get_rect(topleft=(100, SCREEN_HEIGHT // 2 - PLAYER_SIZE[1] // 2))
 enemy_rect = enemy_img.get_rect(topleft=(SCREEN_WIDTH + 50, random.randint(0, SCREEN_HEIGHT - ENEMY_SIZE[1])))
 missile_rect = missile_img.get_rect(center=player_rect.center)
@@ -75,12 +72,11 @@ exploding = False
 explosion_timer = 0
 bg_scroll_x = 0
 
-# --- Função para tocar som com segurança ---
 def play_sound(sound_obj):
-    if sound_obj and pygame.mixer: # Verifica se o som foi carregado e o mixer está ativo
+    if sound_obj and pygame.mixer: 
         sound_obj.play()
 
-# --- Loop Principal (Restante das linhas, aprox. 150) ---
+
 while running:
     dt = clock.tick(FPS) / 1000.0
     events = pygame.event.get()
@@ -118,7 +114,7 @@ while running:
         screen.blit(start_surf, start_rect)
         screen.blit(quit_surf, quit_rect)
 
-    # --- Estado: PLAYING ---
+    
     elif game_state == 'PLAYING':
         # Input Jogador
         if keys[pygame.K_UP] and player_rect.top > 0: player_rect.y -= PLAYER_SPEED
@@ -127,24 +123,23 @@ while running:
             missile_fired = True
             missile_rect.center = player_rect.center
             missile_rect.x += PLAYER_SIZE[0] // 2 - 10
-            play_sound(shoot_sound) # <<< TOCAR SOM TIRO >>>
+            play_sound(shoot_sound) 
 
-        # Movimento e Lógica
+    
         bg_scroll_x = (bg_scroll_x - BG_SCROLL_SPEED) % -SCREEN_WIDTH
         if enemy_active: enemy_rect.x -= ENEMY_SPEED
         if missile_fired: missile_rect.x += MISSILE_SPEED
         else: missile_rect.center = player_rect.center
 
-        # Colisões
         if enemy_active and player_rect.colliderect(enemy_rect):
             print("Game Over - Colisão Jogador!")
-            play_sound(game_over_sound) # <<< TOCAR SOM GAME OVER >>>
-            if pygame.mixer: pygame.mixer.music.stop() # Para música
+            play_sound(game_over_sound) 
+            if pygame.mixer: pygame.mixer.music.stop() 
             game_state = 'GAME_OVER'
             game_over_start_time = pygame.time.get_ticks()
         elif missile_fired and enemy_active and missile_rect.colliderect(enemy_rect):
             print("Inimigo Atingido!")
-            play_sound(explosion_sound) # <<< TOCAR SOM EXPLOSÃO >>>
+            play_sound(explosion_sound) 
             score += POINTS_PER_ENEMY
             enemy_active = False
             missile_fired = False
@@ -152,12 +147,10 @@ while running:
             explosion_rect = explosion_img.get_rect(center=enemy_rect.center)
             explosion_timer = 0
 
-        # Respawn / Reset
         if enemy_active and enemy_rect.right < 0:
             enemy_rect.left = SCREEN_WIDTH + random.randint(50, 150); enemy_rect.y = random.randint(0, SCREEN_HEIGHT - ENEMY_SIZE[1])
         if missile_fired and missile_rect.left > SCREEN_WIDTH: missile_fired = False
 
-        # Lógica da Explosão
         if exploding:
             explosion_timer += 1
             if explosion_timer >= EXPLOSION_DUR_FRAMES:
@@ -165,7 +158,6 @@ while running:
                 enemy_rect.left = SCREEN_WIDTH + random.randint(50, 150); enemy_rect.y = random.randint(0, SCREEN_HEIGHT - ENEMY_SIZE[1])
                 enemy_active = True
 
-        # Desenho
         if game_state == 'PLAYING': # Só desenha se ainda estiver jogando
             screen.blit(bg_img, (bg_scroll_x, 0)); screen.blit(bg_img, (bg_scroll_x + SCREEN_WIDTH, 0))
             screen.blit(player_img, player_rect)
@@ -174,12 +166,10 @@ while running:
             if exploding: screen.blit(explosion_img, explosion_rect)
             score_surf = font_score.render(f"Pontos: {score}", True, WHITE); screen.blit(score_surf, (10, 10))
 
-    # --- Estado: GAME_OVER ---
     elif game_state == 'GAME_OVER':
         if pygame.time.get_ticks() - game_over_start_time >= GAME_OVER_DUR_MS:
             game_state = 'MENU'
 
-        # Desenho
         screen.blit(bg_img, (0,0))
         go_surf = font_game_over.render("GAME OVER", True, RED)
         go_rect = go_surf.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
@@ -187,7 +177,6 @@ while running:
 
     pygame.display.flip()
 
-# --- Fim ---
 if pygame.mixer: pygame.mixer.music.stop() # Garante que a música pare ao fechar
 pygame.quit()
 print("Jogo finalizado.")
