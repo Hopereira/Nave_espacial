@@ -1,0 +1,8 @@
+# Ambiente Virtual e arquivos de build dentro da pasta jogo2
+jogo2/Include/
+jogo2/Lib/
+jogo2/Scripts/
+jogo2/build/
+jogo2/dist/
+jogo2/pyvenv.cfg
+jogo2/main.spec
